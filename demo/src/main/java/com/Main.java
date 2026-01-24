@@ -10,7 +10,9 @@ public class Main {
             Board board = new Board(2);
             board.printBoard();
             board.generateTransition();
+            board.printBoard();
             board.generateTransition();
+            board.printBoard();
         }
     }
 }

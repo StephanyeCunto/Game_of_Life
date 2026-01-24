@@ -1,94 +1,87 @@
 package com.model;
 
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Board {
-    private Cell[] cells;
+    private Cell[][] cells;
     private int size;
 
     public Board(int size){
         this.size = size;
-        cells= new Cell[size*size];
-        
-        for(int i=0; i<size; i++) for(int j=0; j<size; j++) generateIntial(i, j);
-        for(int i=0; i<size; i++) for(int j=0; j<size; j++) neighborAlive(i * size + j);
+        cells = new Cell[size][size];
+
+        generateIntial();
     }
 
-    private void generateIntial(int x, int y){
-        int index = x * size + y;
-        this.cells[index] = new Cell();
-        this.cells[index].setPosition(new Position(x,y));
+    private void generateIntial(){
+        for(int i=0; i<size; i++) for(int j=0; j<size; j++) {
+            this.cells[i][j] = new Cell();
+            this.cells[i][j].setPosition(new Position(i, j));
+            this.cells[i][j].setState(ThreadLocalRandom.current().nextBoolean());
+        }
 
-        boolean valor = ThreadLocalRandom.current().nextBoolean();
-        this.cells[index].setState(valor);
+        for(int i=0; i<size; i++) for(int j=0; j<size; j++) neighborAlives(cells[i][j]);
     }
 
-    private void generateCellsTransition(int index){
-        int alives = cells[index].getAlives();
+    public void generateTransition(){
+        for(int i=0; i<size; i++) for(int j=0; j<size; j++) generateCellsTransition(cells[i][j]);
+        for(int i=0; i<size; i++) for(int j=0; j<size; j++) neighborAlives(cells[i][j]);
+    }
 
-        if(cells[index].isState()){
-            if(alives < 2 || alives > 3) this.cells[index].setState(false);
-            else this.cells[index].setState(true);
-        } else{
-            if(alives == 3) this.cells[index].setState(true);
-            else this.cells[index].setState(false);
+    private void generateCellsTransition(Cell cell){
+        int alives = cell.getAlives();
+
+        if(cell.isState()){
+            if(alives < 2 || alives > 3) cell.setState(false);
+            else cell.setState(true);
+        }else{
+            if(alives == 3) cell.setState(true);
+            else cell.setState(false);
         }
     }
 
-    private void neighborAlive(int index) {
+    private void neighborAlives(Cell cell) {
         int alives = 0;
-        Position[] neighbors = neighbors(index);
+        List<Position> neighbors = neighbors(cell);
 
-        for (Cell cell : cells) {
-            if (!cell.isState()) continue;
-
-            for (Position p : neighbors) {
-                if (cell.getPosition().equals(p)) {
-                    alives++;
-                    break;
-                }
-            }
-        }
-
-        cells[index].setAlives(alives);
+        for(Position p : neighbors) if(cells[p.getX()][p.getY()].isState()) alives++;
+        cell.setAlives(alives);
     }
 
-    private Position[] neighbors(int index){
-        int x = cells[index].getPosition().getX();
-        int y = cells[index].getPosition().getY();
+    private List<Position> neighbors(Cell cell){
+        int x = cell.getPosition().getX();
+        int y = cell.getPosition().getY();
 
-        Position[] neighbors = {
-            new Position(x - 1, y), new Position(x + 1, y), new Position(x, y - 1), new Position(x, y + 1),
-            new Position(x - 1, y + 1), new Position(x + 1, y + 1), new Position(x - 1, y - 1), new Position(x + 1, y - 1)
-        };
+        List<Position> neighbors = new ArrayList<>();
+
+        if (x > 0) neighbors.add(new Position(x - 1, y));
+        if (x < size - 1) neighbors.add(new Position(x + 1, y));
+        
+        if (y > 0) neighbors.add(new Position(x, y - 1));
+        if (y < size - 1) neighbors.add(new Position(x, y + 1));
+
+        if (x > 0 && y > 0) neighbors.add(new Position(x - 1, y - 1));
+        if (x > 0 && y < size - 1) neighbors.add(new Position(x - 1, y + 1));
+        if (x < size - 1 && y > 0) neighbors.add(new Position(x + 1, y - 1));
+        if (x < size - 1 && y < size - 1) neighbors.add(new Position(x + 1, y + 1));
 
         return neighbors;
     }
 
-    public void generateTransition(){
-        for(int i=0; i<size; i++) for(int j=0; j<size; j++) generateCellsTransition(i * size + j);
-
-        for(int i=0; i<size; i++) for(int j=0; j<size; j++) neighborAlive(i * size + j);
-    }
-
     public void printBoard(){
-        int x = 0;
-
         System.out.println();
-        System.out.println("============================");
-        System.out.print("| ");
-        for(Cell cell : this.cells){
-            if(x != cell.getPosition().getX()) {
-                System.out.println(" |");
-                System.out.print("| ");
-                x++;
+        for(int i=0; i<size+2;i++) System.out.println("=");
+
+        for(int i=0; i<size; i++){
+            System.out.print("| ");
+            for(int j=0; j<size; j++){
+                if(cells[i][j].isState()) System.out.print(" * ");
+                else System.out.print(" - ");
             }
-
-            if( cell.isState()) System.out.print(" * ");
-            else System.out.print(" _ ");
-        }
-
-        System.out.println(" |");
-        System.out.println("============================");
+            
+            System.out.println(" |");
+        } 
+        for(int i=0; i<size+2;i++) System.out.println("=");
     }
 }
