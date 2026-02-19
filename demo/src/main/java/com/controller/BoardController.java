@@ -26,4 +26,8 @@ public class BoardController {
     public void generateTransition(){
         this.board.setCells(this.service.generateTransition(this.board.getCells()));
     }
+
+    public boolean getCellState(int i, int j){
+        return this.board.getCells()[i][j].isState();
+    }
 }

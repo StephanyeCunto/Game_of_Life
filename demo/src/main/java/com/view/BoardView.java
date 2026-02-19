@@ -11,24 +11,26 @@ public class BoardView {
         this.controller = new BoardController(size);
     }
 
+    public void generateTransition(){
+        controller.generateTransition();
+        printBoard();
+    }
+
     public void printBoard(){
         System.out.println();
-        for(int i=0; i<size+2;i++) System.out.println("=");
+        for(int i=0; i<size*5;i++) System.out.print("=");
+        System.out.println();
 
         for(int i=0; i<size; i++){
             System.out.print("| ");
             for(int j=0; j<size; j++){
-                if(controller.getBoard().getCells()[i][j].isState()) System.out.print(" * ");
+                if(controller.getCellState(i, j)) System.out.print(" * ");
                 else System.out.print(" - ");
             }
             
             System.out.println(" |");
         } 
-        for(int i=0; i<size+2;i++) System.out.println("=");
+        for(int i=0; i<size*5;i++) System.out.print("=");
     }
 
-    public void generateTransition(){
-        controller.generateTransition();
-        printBoard();
-    }
 }

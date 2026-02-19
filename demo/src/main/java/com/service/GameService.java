@@ -13,7 +13,7 @@ public class GameService {
 
     public Cell[][] generateIntial(){
         Cell[][] cells = new Cell[size][size];
-        for(int i=0; i<size; i++) for(int j=0; j<size; j++) cells[i][j].setState(ThreadLocalRandom.current().nextBoolean());
+        for(int i=0; i<size; i++) for(int j=0; j<size; j++) cells[i][j] = new Cell(ThreadLocalRandom.current().nextBoolean());
 
         return cells;
     }
