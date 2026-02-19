@@ -32,7 +32,7 @@ public class GameService {
         int threads = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(threads);
 
-    int aux = size / threads;
+        int aux = size / threads;
 
         for (int k = 0; k < threads; k++) {
             final int threadIndex = k;
