@@ -1,7 +1,6 @@
 package com.controller;
 
 import com.model.Board;
-import com.model.Cell;
 import com.service.GameService;
 
 public class BoardController {
@@ -13,7 +12,7 @@ public class BoardController {
         this.size = size;
         this.board = new Board(size);
         this.service = new GameService(size);
-        this.board.setCells(this.service.generateIntial());
+        this.board.setCells(this.service.generateInitial());
     }
 
     public void generateTransition() {
@@ -21,11 +20,11 @@ public class BoardController {
     }
 
     public boolean[][] getBoardSnapshot() {
-        Cell[][] cells = board.getCells();
+        boolean[][] cells = board.getCells();
         boolean[][] snapshot = new boolean[size][size];
         for (int i = 0; i < size; i++)
             for (int j = 0; j < size; j++)
-                snapshot[i][j] = cells[i][j].isState();
+                snapshot[i][j] = cells[i][j];
         return snapshot;
     }
 

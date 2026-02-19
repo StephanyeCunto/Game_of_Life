@@ -2,6 +2,8 @@ package com.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.model.*;
@@ -11,40 +13,55 @@ import lombok.AllArgsConstructor;
 public class GameService {
     private int size;
 
-    public Cell[][] generateIntial(){
-        Cell[][] cells = new Cell[size][size];
-        for(int i=0; i<size; i++) for(int j=0; j<size; j++) cells[i][j] = new Cell(ThreadLocalRandom.current().nextBoolean());
-
+    public boolean[][] generateInitial() {
+        boolean[][] cells = new boolean[size][size];
+        for (int i = 0; i < size; i++)
+            for (int j = 0; j < size; j++)
+                cells[i][j] = ThreadLocalRandom.current().nextBoolean();
         return cells;
     }
 
-    private void fillCell(Cell[][] cell){
-       for(int i=0; i<size; i++) for(int j=0; j<size; j++) cell[i][j] = new Cell(false);
+    private void fillboolean(boolean[][] cell){
+       for(int i=0; i<size; i++) for(int j=0; j<size; j++) cell[i][j] = false;
     }
 
-    public Cell[][] generateTransition(Cell[][] cells){
-        Cell[][] cellsNext = new Cell[size][size];
-        fillCell(cellsNext);
+    public boolean[][] generateTransition(boolean[][] cells){
+        boolean[][] cellsNext = new boolean[size][size];
+        fillboolean(cellsNext);
 
-        for(int i=0; i<size; i++) for(int j=0; j<size; j++) generateCellsTransition(i, j, cells,cellsNext);
+        int threads = Runtime.getRuntime().availableProcessors();
+        ExecutorService executor = Executors.newFixedThreadPool(threads);
+
+    int aux = size / threads;
+
+        for (int k = 0; k < threads; k++) {
+            final int threadIndex = k;
+
+            executor.execute(() -> {
+                int start = threadIndex * aux;
+                int end = (threadIndex + 1) * aux;
+                for (int i = start; i < end; i++) for (int j = 0; j < size; j++) generatebooleansTransition(i, j, cells, cellsNext);
+            });
+        }
+        executor.shutdown();
 
         return cellsNext;
     }
 
-    private void generateCellsTransition(int i, int j,Cell[][] cells, Cell[][] cellsNext){
+    private void generatebooleansTransition(int i, int j,boolean[][] cells, boolean[][] cellsNext){
         int alives = neighborAlives(i, j, cells);
         boolean state = false;
 
-        state = cells[i][j].isState() ? (alives >= 2 && alives <= 3) : (alives == 3);
+        state = cells[i][j] ? (alives >= 2 && alives <= 3) : (alives == 3);
 
-        cellsNext[i][j].setState(state);
+        cellsNext[i][j] = state;
     }
 
-    private int neighborAlives(int i, int j, Cell[][] cells) {
+    private int neighborAlives(int i, int j, boolean[][] cells) {
         int alives = 0;
         List<Position> neighbors = neighbors(i,j);
 
-        for(Position p : neighbors) if(cells[p.getX()][p.getY()].isState()) alives++;
+        for(Position p : neighbors) if(cells[p.getX()][p.getY()]) alives++;
 
         return alives;
     }
