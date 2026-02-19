@@ -1,18 +1,12 @@
 package com;
 
-import com.model.Board;
+import com.view.BoardView;
 
 public class Main {
     public static void main(String[] args) {
+       BoardView board = new BoardView(2);
+       board.printBoard();
 
-        for(int i=0; i<10; i++){
-            System.out.println(" Quadro novo: ");
-            Board board = new Board(2);
-            board.printBoard();
-            board.generateTransition();
-            board.printBoard();
-            board.generateTransition();
-            board.printBoard();
-        }
+       board.generateTransition();
     }
 }
