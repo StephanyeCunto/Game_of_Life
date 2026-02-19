@@ -9,7 +9,7 @@ public class BoardView {
         this.controller = new BoardController(size);
     }
 
-    public void generateTransition() {
+    public void generateTransition() throws InterruptedException{
         controller.generateTransition();
         printBoard();
     }

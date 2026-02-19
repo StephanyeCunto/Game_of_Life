@@ -15,7 +15,7 @@ public class BoardController {
         this.board.setCells(this.service.generateInitial());
     }
 
-    public void generateTransition() {
+    public void generateTransition() throws InterruptedException{
         this.board.setCells(this.service.generateTransition(this.board.getCells()));
     }
 

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 import com.model.*;
 import lombok.AllArgsConstructor;
@@ -25,7 +26,7 @@ public class GameService {
        for(int i=0; i<size; i++) for(int j=0; j<size; j++) cell[i][j] = false;
     }
 
-    public boolean[][] generateTransition(boolean[][] cells){
+    public boolean[][] generateTransition(boolean[][] cells) throws InterruptedException{
         boolean[][] cellsNext = new boolean[size][size];
         fillboolean(cellsNext);
 
@@ -39,12 +40,13 @@ public class GameService {
 
             executor.execute(() -> {
                 int start = threadIndex * aux;
-                int end = (threadIndex + 1) * aux;
+                int end = (threadIndex == threads - 1) ? size : (threadIndex + 1) * aux;
                 for (int i = start; i < end; i++) for (int j = 0; j < size; j++) generatebooleansTransition(i, j, cells, cellsNext);
             });
         }
-        executor.shutdown();
 
+        executor.shutdown();
+        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
         return cellsNext;
     }
 
