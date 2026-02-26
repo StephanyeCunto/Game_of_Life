@@ -1,43 +1,46 @@
-
 package com.controller;
 
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 
 import java.util.concurrent.*;
 
-@RestController
+@Controller
 public class GameController {
 
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private final SimpMessagingTemplate messagingTemplate;
+    private final ScheduledExecutorService scheduler =
+            Executors.newSingleThreadScheduledExecutor();
 
-    @GetMapping("/start")
-    public SseEmitter start(@RequestParam int size,@RequestParam int time) {
-        SseEmitter emitter = new SseEmitter();
+    public GameController(SimpMessagingTemplate messagingTemplate) {
+        this.messagingTemplate = messagingTemplate;
+    }
+
+    @MessageMapping("/start")
+    public void start(GameRequest request) {
+
+        int size = request.getSize();
+        int time = request.getTime();
+
         BoardController board = new BoardController(size);
 
         scheduler.scheduleAtFixedRate(() -> {
             try {
-                boolean[][] boardSnapshot = board.getBoardSnapshot();
-                StringBuilder sb = new StringBuilder();
 
-                for (int i = 0; i < size; i++){
-                    for (int j = 0; j < size; j++) {
-                        sb.append(boardSnapshot[i][j] ? "* " : "- ");
-                    }
-                    sb.append("\n");
-                }
+                boolean[][] snapshot = board.getBoardSnapshot();
 
-                emitter.send(sb.toString());
+                messagingTemplate.convertAndSend(
+                        "/topic/game",
+                        snapshot
+                );
 
                 board.generateTransition();
 
             } catch (Exception e) {
-                emitter.complete();
+                e.printStackTrace();
             }
 
         }, 0, time, TimeUnit.MILLISECONDS);
-
-        return emitter;
     }
 }
